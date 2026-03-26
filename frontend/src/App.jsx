@@ -8,7 +8,7 @@ import { isTokenValid } from "./Redux/Auth/isTokenValid.js";
 import NavBar from "./components/Navbar/Navbar.jsx";
 import Edit from "./pages/Edit.jsx";
 import { StompSessionProvider } from "react-stomp-hooks";
-import { BASE_URL } from "./Redux/config.js";
+import { BASE_URL, WS_URL } from "./Redux/config.js";
 
 const App = () => {
   const { isAuthenticated, accessToken } = useSelector((store) => store.authStore);
@@ -45,7 +45,7 @@ function EditWrapper({ username }) {
 
   return (
     <StompSessionProvider
-      url="ws://localhost:8080/docs/ws"
+      url={WS_URL}
       connectHeaders={{
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       }}

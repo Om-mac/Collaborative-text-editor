@@ -1,0 +1,58 @@
+databases:
+  - name: crdt-docs-db
+    databaseName: crdt_docs
+    plan: free
+    region: oregon
+
+services:
+  # Backend - Spring Boot API
+  - type: web
+    name: crdt-editor-backend
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: crdt-docs-db
+          property: connectionURI
+        # Render provides a standard URI; Spring Boot needs jdbc: prefix.
+        # You must manually set this in the Render dashboard as:
+        # jdbc:postgresql://<host>:<port>/<dbname>
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: crdt-docs-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: crdt-docs-db
+          property: password
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+        # Set this AFTER frontend deploys, e.g.: https://crdt-editor-frontend.onrender.com
+      - key: PORT
+        value: 8080
+
+  # Frontend - React Static Site
+  - type: web
+    name: crdt-editor-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+        # Set to backend URL, e.g.: https://crdt-editor-backend.onrender.com
+      - key: VITE_WS_URL
+        sync: false
+        # Set to backend WS URL, e.g.: wss://crdt-editor-backend.onrender.com/docs/ws
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -5,6 +5,7 @@ import Delta from "quill-delta";
 import QuillCursors from "quill-cursors";
 import { useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
+import { WS_URL } from "../Redux/config.js";
 
 Quill.register("modules/cursors", QuillCursors);
 
@@ -38,7 +39,7 @@ export default function Edit() {
     if (!token) return;
 
     const client = new Client({
-      brokerURL: `ws://localhost:8080/docs/ws`,
+      brokerURL: WS_URL,
       reconnectDelay: 5000,
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
